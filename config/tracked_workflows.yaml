@@ -1,98 +1,34 @@
-page_title: LF Builds
+page_title: Lightmatter Workflow Dashboard
 copier_project: lincc-frameworks/python-project-template
 
-repos:  
-  - repo: asv-formatter
-    owner: lincc-frameworks
-    smoke-test: smoke-test.yml
-    live-build: testing-and-coverage.yml
-
-  - repo: citation-compass
-    owner: lincc-frameworks
-    smoke-test: smoke-test.yml
-    benchmarks: asv-nightly.yml
-    live-build: testing-and-coverage.yml
-
-  - repo: hats
-    owner: astronomy-commons
-    smoke-test: smoke-test.yml
-    benchmarks: asv-nightly.yml
-    live-build: testing-and-coverage.yml
-
-  - repo: hats-cloudtests
-    owner: astronomy-commons
-    smoke-test: smoke-test.yml
-    benchmarks: asv-nightly.yml
-    live-build: testing-and-coverage.yml
-
-  - repo: hats-import
-    owner: astronomy-commons
-    smoke-test: smoke-test.yml
-    live-build: testing-and-coverage.yml
-
-  - repo: hyrax
-    owner: lincc-frameworks
-    smoke-test: smoke-test.yml
-    build-docs: build-documentation.yml
-    benchmarks: asv-nightly.yml
-    live-build: testing-and-coverage.yml
-
-  - repo: kbmod
-    owner: dirac-institute
-    smoke-test: canary_builds.yaml
-    build-docs: build_docs.yaml
-    live-build: pr_tests.yaml
-  
-  - repo: koffi
-    owner: lincc-frameworks
-    smoke-test: smoke-test.yml
-    live-build: testing-and-coverage.yml
-  
-  - repo: lf-workflow-dash
-    owner: lincc-frameworks
-    smoke-test: smoke-test.yml
-    live-build: testing-and-coverage.yml
-    other_workflows: 
-      - main.yml
-
-  - repo: lsdb
-    owner: astronomy-commons
-    smoke-test: smoke-test.yml
-    benchmarks: asv-nightly.yml
-    live-build: testing-and-coverage.yml
-      
-  - repo: nested-pandas
-    owner: lincc-frameworks
-    smoke-test: smoke-test.yml
-    build-docs: build-documentation.yml
-    benchmarks: asv-nightly.yml
-    live-build: testing-and-coverage.yml
-      
-  - repo: python-project-template
-    owner: lincc-frameworks
+repos:
+  - repo: sofware-qa
+    owner: lightmatter-ai
+    other_workflows:
+      - OpenBMC Build + Deploy + Robot Tests 
+  - repo: openbmc
+    owner: lightmatter-ai
+    branch: master  
+    live-build: CI.yml
+    smoke-test: main.yml
+  - repo: passage-ops
+    owner: lightmatter-ai
+    branch: main
+    smoke-test: build-test-remote.yml
+    live-build: build-test.yml
+  - repo: laser-ops  
+    owner: lightmatter-ai
+    live-build: build-test.yml
+  - repo: serdes
+    owner: lightmatter-ai
+    smoke-test: build-test-remote.yml
+    live-build: build-test.yml
+    docs-build: generate-and-publish-documentation.yml
+  - repo: masai-sdk
+    owner: lightmatter-ai
+    smoke-test: bmc-integration-tests.yml
     live-build: ci.yml
-    smoke-test: smoke-test.yml
-  
-  - repo: pre-commit-hooks
-    owner: lincc-frameworks
-    live-build: testing-and-coverage.yml
-    smoke-test: smoke-test.yml
-
-  - repo: lightcurvelynx
-    owner: lincc-frameworks
-    smoke-test: smoke-test.yml
-    benchmarks: asv-nightly.yml
-    live-build: testing-and-coverage.yml
-
-  - repo: uncle-val
-    owner: lincc-frameworks
-    smoke-test: smoke-test.yml
-    live-build: testing-and-coverage.yml
-  
-extra_links: 
-  - text: LSDB Dash
-    url: https://lincc-frameworks.github.io/lf-workflow-dash/lsdb.html
-  - text: RAIL Dash
-    url: https://lincc-frameworks.github.io/lf-workflow-dash/rail.html
-  - text: Incubator Dash
-    url: https://lincc-frameworks.github.io/lf-workflow-dash/incubator.html
+    docs: deploy-docs.yml
+  - repo: FPGA_OS
+    owner: lightmatter-ai
+ 
