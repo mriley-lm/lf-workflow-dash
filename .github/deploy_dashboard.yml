@@ -23,12 +23,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
-          python3 src/lf_workflow_dash/update_dashboard.py $GITHUB_TOKEN ./config/tracked_workflows.yaml index.html
+          mkdir -p _site
+          python3 src/lf_workflow_dash/update_dashboard.py $GITHUB_TOKEN ./config/tracked_workflows.yaml _site/index.html
 
       - name: Upload to GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.' # Uploads the generated index.html and assets
+          path: '_site ' # Uploads the generated index.html and assets
 
   deploy:
     needs: update-and-deploy
