@@ -29,7 +29,7 @@ jobs:
       - name: Upload to GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '_site ' # Uploads the generated index.html and assets
+          path: '_site' # Uploads the generated index.html and assets
 
   deploy:
     needs: update-and-deploy
