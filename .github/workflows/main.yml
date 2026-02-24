@@ -25,11 +25,20 @@ jobs:
         run: |
           python3 src/lf_workflow_dash/update_dashboard.py ${{ secrets.PERSONAL_ACCESS_TOKEN }} ./config/tracked_workflows.yaml html/index.html
 
-          python src/lf_workflow_dash/lsdb_interrupts/open_prs.py ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-      - name: Deploy to Github pages
-        uses: JamesIves/github-pages-deploy-action@v4
+   
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          branch: gh-pages
-          folder: html
-          git-config-name: deploy-bot
-          git-config-email: <>
+          path: 'html'
+
+  deploy:
+    needs: run_update
+    permissions:
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
