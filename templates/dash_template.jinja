@@ -1,147 +1,85 @@
+{% macro render_status(label, wf) %}
+<div class="p-3 rounded-lg border {% if wf and wf.status == 'success' %}bg-green-50 border-green-100{% elif wf and wf.status == 'failure' %}bg-red-50 border-red-100{% else %}bg-slate-50 border-slate-100{% endif %}">
+    <div class="flex justify-between items-start mb-1">
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ label }}</p>
+        {% if wf and wf.last_updated %}
+            <span class="text-[10px] text-slate-400 font-mono">{{ wf.last_updated }}</span>
+        {% endif %}
+    </div>
+    <div class="flex items-center space-x-2">
+        {% if wf %}
+            <span class="w-2.5 h-2.5 rounded-full {% if wf.status == 'success' %}bg-green-500{% elif wf.status == 'failure' %}bg-red-500{% else %}bg-slate-300{% endif %}"></span>
+            <span class="text-sm font-medium">{{ wf.status | capitalize }}</span>
+       
+        {% else %}
+            <span class="text-sm text-slate-400 italic">No Data</span>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
+
 <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>{{page_title}}</title>
-        <link rel="icon" type="image/x-icon" href="img/favicon.png">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-        <link rel="stylesheet" href="css/styles.css">
-        <script>
-        setTimeout(function(){
-            window.location.reload();
-        }, 60000);
-        </script>
-    </head>
-    <body>
-    <table>
-        <tr>
-            <th colspan="1" scope="colgroup" style="width:150px">Repository</th>
-            <th colspan="1" scope="colgroup" style="width:50px">Copier<br>Version</th>
-            {%- if contains_smoke %}
-            <th colspan="3" scope="colgroup">Nightly Test</th>
-            {%- endif %}
-            {%- if contains_bench %}
-            <th colspan="3" scope="colgroup">Nightly<br>Benchmarks</th>
-            {%- endif %}
-            {%- if contains_docs %}
-            <th colspan="3" scope="colgroup">Build Docs</th>
-            {%- endif %}
-            {%- if contains_live %}
-            <th colspan="3" scope="colgroup">Live Build</th>
-            {%- endif %}
-            {%- if contains_other %}
-            <th colspan="1" scope="colgroup">Other Workflows</th>
-            {%- endif %}
-        </tr>
-    </tr>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .status-success { @apply bg-green-100 text-green-800 border-green-200; }
+        .status-failure { @apply bg-red-100 text-red-800 border-red-200; }
+        .status-pending { @apply bg-yellow-100 text-yellow-800 border-yellow-200; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900">
+    <div class="max-w-7xl mx-auto py-10 px-4">
+        <header class="mb-10 flex justify-between items-end">
+            <div>
+                <h1 class="text-4xl font-bold tracking-tight text-slate-900">{{ page_title }}</h1>
+                <p class="mt-2 text-lg text-slate-600">Engineering Reliability & Deployment Status</p>
+            </div>
+            <div class="text-right text-sm text-slate-500">
+                <div>Last updated: <span class="font-mono">{{ last_updated }}</span></div>
+                <div class="mt-1 text-xs">Template: <span class="font-mono">{{ copier_semver }}</span></div>
+            </div>
+        </header>
 
-    {% for project in all_projects %}
-    <tr>
-        <td><a href="{{project.repo_url}}">{{project.repo}}</a></td>
-        <td class="{{project.copier_version_display_class}}">{{project.copier_version}}</td>
+       {% for project in all_projects %}
+    {# Pre-calculate health stats for the badge #}
+    {% set active_wfs = [project.smoke_test, project.live_build, project.build_docs, project.benchmarks] | reject('none') | list %}
+    {% for other in project.other_workflows %}{% do active_wfs.append(other) %}{% endfor %}
+    
+    {% set total_count = active_wfs | length %}
+    {% set success_count = active_wfs | selectattr('status', 'equalto', 'success') | list | length %}
 
-        {%- if contains_smoke %}
-        <!-- Smoke Test -->
-        <td class="{{project.smoke_test.display_class}} align-right">
-            {%- if project.smoke_test.is_stale %}
-            <span class="gray-cell">stale</span><br/>
-            {%- endif %}
-            {{project.smoke_test.workflow_status}}
-        </td>
-        <td class="{{project.smoke_test.display_class}} align-center">
-            {%- if project.smoke_test.is_stale %}
-            <i class="gray-cell fa fa-clock-o"></i><br/>
-            {%- endif %}
-            <i class="{{project.smoke_test.icon_class}}"></i>
-        </td>
-        <td class="{{project.smoke_test.display_class}}">
-            <a href="{{project.smoke_test.workflow_url}}">
-                {{project.smoke_test.conclusion_time}}
-            </a>
-        </td>
-        {%- endif %}
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-4">
+                    <h2 class="text-xl font-bold text-slate-900">{{ project.repo }}</h2>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold 
+                        {% if success_count == total_count and total_count > 0 %} bg-green-100 text-green-700
+                        {% elif success_count > 0 %} bg-amber-100 text-amber-700
+                        {% else %} bg-red-100 text-red-700 {% endif %}">
+                        {{ success_count }}/{{ total_count }} Passing
+                    </span>
+                </div>
+                <a href="https://github.com/{{ project.owner }}/{{ project.repo }}" class="text-sm text-indigo-600 hover:underline">View Repo →</a>
+            </div>
 
-        {%- if contains_bench %}
-        <!-- Benchmarks -->
-        <td class="{{project.benchmarks.display_class}} align-right">
-            {%- if project.benchmarks.is_stale %}
-            <span class="gray-cell">stale</span><br/>
-            {%- endif %}
-            {{project.benchmarks.workflow_status}}
-        </td>
-        <td class="{{project.benchmarks.display_class}} align-center">
-            {%- if project.benchmarks.is_stale %}
-            <i class="gray-cell fa fa-clock-o"></i><br/>
-            {%- endif %}
-            <i class="{{project.benchmarks.icon_class}}"></i>
-        </td>
-        <td class="{{project.benchmarks.display_class}}">
-            <a href="{{project.benchmarks.workflow_url}}">
-                {{project.benchmarks.conclusion_time}}
-            </a>
-        </td>
-        {%- endif %}
-
-        {%- if contains_docs %}
-        <!-- Build Docs (don't worry about is_stale here) -->
-        <td class="{{project.build_docs.display_class}} align-right">
-            {{project.build_docs.workflow_status}}
-        </td>
-        <td class="{{project.build_docs.display_class}} align-center">
-            <i class="{{project.build_docs.icon_class}}"></i>
-        </td>
-        <td class="{{project.build_docs.display_class}}">
-            <a href="{{project.build_docs.workflow_url}}">
-                {{project.build_docs.conclusion_time}}
-            </a>
-        </td>
-        {%- endif %}
-
-        {%- if contains_live %}
-        <!-- Live Build -->
-        <td class="{{project.live_build.display_class}} align-right">
-            {%- if project.live_build.is_stale %}
-            <span class="gray-cell">stale</span><br/>
-            {%- endif %}
-            {{project.live_build.workflow_status}}
-        </td>
-        <td class="{{project.live_build.display_class}} align-center">
-            {%- if project.live_build.is_stale %}
-            <i class="gray-cell fa fa-clock-o"></i><br/>
-            {%- endif %}
-            <i class="{{project.live_build.icon_class}}"></i>
-        </td>
-        <td class="{{project.live_build.display_class}}">
-            <a href="{{project.live_build.workflow_url}}">
-                {{project.live_build.conclusion_time}}
-            </a>
-        </td>
-        {%- endif %}
-        
-        {%- if contains_other %}
-        <!-- Other -->
-        <td>
-            {% for workflow in project.other_workflows %}
-                <a href="{{workflow.workflow_url}}">{{workflow.friendly_name}}</a>
-                <br/>
-                <div class="{{workflow.display_class}} inline">{{workflow.workflow_status}} <i class="{{workflow.icon_class}}"></i></div>
-                <div class="inline"><a href="{{workflow.workflow_url}}">{{workflow.conclusion_time_one_line}}</a></div>
-                <br/>
-            </a>
-            {% endfor %}
-        </td>
-        {%- endif %}
-    </tr>
-    {% endfor %}
-    </table>
-
-    <p>
-        Last Updated {{last_updated}} | 
-        <a href='https://github.com/lincc-frameworks/{{dash_repo}}'><i class=\"fa fa-github\"></i> {{dash_repo}}</a>
-        {% for link in extra_links %}
-        | <a href='{{link.url}}'><i class=\"fa fa-github\"></i> {{link.text}}</a>
-        {% endfor %}
-    </p>
-
-    </body>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {% if project.smoke_test %}{{ render_status("Smoke Test", project.smoke_test) }}{% endif %}
+                {% if project.live_build %}{{ render_status("Live Build", project.live_build) }}{% endif %}
+                {% if project.build_docs %}{{ render_status("Docs", project.build_docs) }}{% endif %}
+                {% if project.benchmarks %}{{ render_status("Benchmarks", project.benchmarks) }}{% endif %}
+                {% for other in project.other_workflows %}
+                    {{ render_status(other.friendly_name or "Custom", other) }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endfor %}
+    </div>
+</body>
 </html>
+
