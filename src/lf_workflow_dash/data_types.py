@@ -46,6 +46,9 @@ class WorkflowElemData:
         self.conclusion_time = conclusion_time
         self.conclusion_time_one_line = conclusion_time.replace("<br>", " ")
         self.is_stale = is_stale
+        self.status = str(status).lower() if status else "pending"
+        #self.last_updated = last_updated
+        self.is_stale = is_stale
         if status == "success":
             self.display_class = "green-cell"
             self.icon_class = "fa fa-check-circle"
