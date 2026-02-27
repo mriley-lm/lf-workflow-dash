@@ -22,6 +22,8 @@ class WorkflowElemData:
     is_stale: bool = False
     friendly_name: str = ""
     branch: str = ""
+    last_commit_sha: str = ""
+    last_commit_message: str = ""
 
     def __init__(self, workflow_name, repo_url, owner, repo, branch=""):
         self.workflow_name = workflow_name

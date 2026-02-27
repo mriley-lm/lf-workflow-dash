@@ -10,11 +10,21 @@
         {% if wf %}
             <span class="w-2.5 h-2.5 rounded-full {% if wf.status == 'success' %}bg-green-500{% elif wf.status == 'failure' %}bg-red-500{% else %}bg-slate-300{% endif %}"></span>
             <span class="text-sm font-medium">{{ wf.status | capitalize }}</span>
-       
         {% else %}
             <span class="text-sm text-slate-400 italic">No Data</span>
         {% endif %}
     </div>
+    {% if wf and wf.status == 'failure' and (wf.last_commit_sha or wf.last_commit_message) %}
+    <div class="mt-2 pt-2 border-t border-slate-200">
+        <p class="text-[10px] uppercase tracking-wider text-slate-500 mb-0.5">Last commit</p>
+        {% if wf.last_commit_message %}
+        <p class="text-xs text-slate-700 truncate" title="{{ wf.last_commit_message }}">{{ wf.last_commit_message }}</p>
+        {% endif %}
+        {% if wf.last_commit_sha %}
+        <a href="https://github.com/{{ wf.owner }}/{{ wf.repo }}/commit/{{ wf.last_commit_sha }}" target="_blank" rel="noopener" class="text-[10px] font-mono text-indigo-600 hover:underline">{{ wf.last_commit_sha[:7] }}</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endmacro %}
 

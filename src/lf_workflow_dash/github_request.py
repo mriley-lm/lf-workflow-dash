@@ -60,6 +60,11 @@ def update_workflow_status(workflow_elem, token):  # pragma: no cover
                     last_run = response_json["workflow_runs"][0]
                     workflow_elem.friendly_name = last_run["name"]
 
+                    # Store last commit for display (e.g. when workflow is failing)
+                    head = last_run.get("head_commit") or {}
+                    workflow_elem.last_commit_sha = head.get("id") or last_run.get("head_sha") or ""
+                    workflow_elem.last_commit_message = (head.get("message") or "").strip().split("\n")[0]
+
                     # Get the workflow conclusion ("success", "failure", etc)
                     conclusion = last_run["conclusion"]
 
@@ -78,6 +83,9 @@ def update_workflow_status(workflow_elem, token):  # pragma: no cover
                             last_run = response_json["workflow_runs"][1]
                             conclusion = last_run["conclusion"]
                             conclusion_time, is_stale = get_conclusion_time(last_run)
+                            head = last_run.get("head_commit") or {}
+                            workflow_elem.last_commit_sha = head.get("id") or last_run.get("head_sha") or ""
+                            workflow_elem.last_commit_message = (head.get("message") or "").strip().split("\n")[0]
                         else:
                             conclusion = "pending"
                             conclusion_time = ""
